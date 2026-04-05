@@ -70,5 +70,6 @@ def translate(string, language):
 
 __all__ = ('AI',
 'yesorno',
-'translate'
+'translate',
+'exc'
 )
