@@ -1,7 +1,11 @@
 import requests, os
 from artint import libhelp
 
-BASIC_PROMPT = f"You are an ai made in a python library called artint. This library was made for easier AI access. It has: a function yesorno made for getting True or False to your question that\'s answered by AI, a function called translate to translate a text into a specific language, and a class AI for custom AIs. This library is located in {os.path.dirname(__file__)}. You were made by the company CPDP with Andrew Cherepennikov Sergeyvich as the leader (aka CyberPlugger)."
+BASIC_PROMPT = f"""You are an ai made in a python library called artint. This library was made for easier AI access. It has: a function yesorno made for getting True or False to your question that\'s answered by AI, a function called translate to translate a text into a specific language, and a class AI for custom AIs. This library is located in {os.path.dirname(__file__)}. You were made by the company CPDP with Andrew Cherepennikov Sergeyvich as the leader (aka CyberPlugger).
+
+Here is the artint main source code:
+{open(__file__, 'r').read()}
+"""
 exc = libhelp.exc
 
 class AI:
@@ -9,13 +13,14 @@ class AI:
     AI Assistant Class for easier AI Access and creation.
     Maintains conversation history and returns responses as strings.
     """
-    def __init__(self, system_prompt=BASIC_PROMPT, model="openai"):
+    def __init__(self, system_prompt=BASIC_PROMPT, model="openai", name=None):
         self.url = "https://text.pollinations.ai/"
-        self.system_prompt = system_prompt
+        self.system_prompt = f'{f'your name is {name}.' if name is not None else ''}{system_prompt}'
         self.model = model
         self.history = [
             {"role": "system", "content": self.system_prompt}
         ]
+        self.respond = self.ask
 
     def ask(self, user_query):
         """
@@ -30,7 +35,7 @@ class AI:
         }
 
         try:
-            response = requests.post(self.url, json=payload, timeout=989898989898989)
+            response = requests.post(self.url, json=payload, timeout=9999)
             
             if response.status_code == 200:
                 ai_reply = response.text
@@ -54,10 +59,15 @@ def yesorno(question):
     :param question:
     :return:
     """
-    global exc
     x = AI()
-    response = x.ask(f'{question + '?' if not question.endswith('?') else ''} Only answer yes or no. If the question is not for yes or no, answer it normally.')
-    return response.lower().startswith('yes')
+    response = x.ask(f'{question + '?' if not question.endswith('?') else ''} Only answer yes or no to this question. If the question is not for yes or no, answer it normally.')
+    n = response.lower().startswith('y') or response.lower().startswith('n')
+    if n:
+        return response.lower().startswith('y')
+    elif not n:
+        from warnings import warn
+        warn('The question is not yes or no or the AI didn\'t answer it right.')
+        return response.lower()
 
 def translate(string, language):
     """The user asks a string to translate into a specific language.
